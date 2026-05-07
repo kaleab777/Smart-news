@@ -5,13 +5,16 @@ import json
 import os
 import re
 from collections import defaultdict
-
+from dotenv import load_dotenv
+load_dotenv()
 app = Flask(__name__, template_folder="templates")
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # ── API Keys ──────────────────────────────────────────
-GNEWS_API_KEY = "fdd48629b42385245663a6501e92b23f"
-YOUTUBE_API_KEY = "AIzaSyDEe7Xby_6tXhMuEo-29YwzaEfCmBv0d9E"
+GNEWS_API_KEY = os.environ.get(
+    "GNEWS_API_KEY", "fdd48629b42385245663a6501e92b23f")
+YOUTUBE_API_KEY = os.environ.get(
+    "YOUTUBE_API_KEY", "AIzaSyDEe7Xby_6tXhMuEo-29YwzaEfCmBv0d9E")
 AK = os.environ.get("ANTHROPIC_API_KEY", "")
 
 # ── HTTP helper ───────────────────────────────────────
