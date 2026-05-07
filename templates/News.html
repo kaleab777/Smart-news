@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Smart News — AI Intelligence</title>
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;1,700&family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap"
+    rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #080a0f;
+      --sf: #0f1119;
+      --sf2: #131620;
+      --sf3: #171b27;
+      --bd: #1c2035;
+      --bd2: #232843;
+      --ac: #4f6ef7;
+      --ac-s: rgba(79, 110, 247, .12);
+      --g: #00d4a0;
+      --g-s: rgba(0, 212, 160, .1);
+      --tx: #e9ecf5;
+      --tx2: #a8adc4;
+      --mu: #4a506b;
+      --ng: #ff6b6b;
+      --ng-s: rgba(255, 107, 107, .1)
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--tx);
+      font-family: 'Geist', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      background: radial-gradient(ellipse 80% 50% at 20% -10%, rgba(79, 110, 247, .06), transparent 60%), radial-gradient(ellipse 60% 40% at 85% 110%, rgba(0, 212, 160, .04), transparent 60%)
+    }
+
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
+      opacity: .6
+    }
+
+    ::-webkit-scrollbar {
+      width: 3px;
+      height: 3px
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--bd2);
+      border-radius: 3px
+    }
+
+    .nav {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      height: 60px;
+      border-bottom: 1px solid rgba(28, 32, 53, .8);
+      background: rgba(8, 10, 15, .88);
+      backdrop-filter: blur(24px) saturate(180%);
+      display: flex;
+      align-items: center;
+      padding: 0 32px;
+      gap: 16px
+    }
+
+    .logo-mark {
+      width: 28px;
+      height: 28px;
+      border-radius: 7px;
+      background: linear-gradient(135deg, var(--ac), #7b5ffc);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 13px;
+      color: #fff;
+      box-shadow: 0 2px 12px rgba(79, 110, 247, .4);
+      flex-shrink: 0
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      cursor: pointer;
+      font-family: 'Geist', sans-serif;
+      transition: all .18s;
+      border-radius: 9px;
+      font-size: 12px;
+      font-weight: 500
+    }
+
+    .bp2 {
+      background: var(--ac);
+      color: #fff;
+      border: none;
+      height: 42px;
+      padding: 0 22px;
+      font-size: 13px;
+      font-weight: 600;
+      box-shadow: 0 1px 20px rgba(79, 110, 247, .35)
+    }
+
+    .bp2:hover:not(:disabled) {
+      background: #6080fa;
+      box-shadow: 0 2px 28px rgba(79, 110, 247, .5);
+      transform: translateY(-1px)
+    }
+
+    .bp2:disabled {
+      opacity: .45;
+      cursor: not-allowed
+    }
+
+    .bi {
+      background: var(--sf2);
+      border: 1px solid var(--bd);
+      color: var(--mu);
+      width: 38px;
+      height: 38px;
+      justify-content: center;
+      flex-shrink: 0;
+      padding: 0
+    }
+
+    .bi:hover,
+    .bi.on {
+      border-color: var(--ac);
+      color: var(--ac);
+      background: var(--ac-s)
+    }
+
+    .bi.rec {
+      background: var(--ng-s);
+      border-color: var(--ng);
+      color: var(--ng);
+      animation: rPulse 1.2s infinite
+    }
+
+    .bg {
+      background: transparent;
+      border: 1px solid var(--bd);
+      color: var(--tx2);
+      height: 36px;
+      padding: 0 14px
+    }
+
+    .bg:hover {
+      border-color: var(--ac);
+      color: var(--ac);
+      background: var(--ac-s)
+    }
+
+    .bg.on {
+      border-color: var(--g);
+      color: var(--g);
+      background: var(--g-s)
+    }
+
+    .inp {
+      background: var(--sf);
+      border: 1px solid var(--bd);
+      border-radius: 10px;
+      padding: 0 16px;
+      color: var(--tx);
+      font-family: 'Geist', sans-serif;
+      font-size: 14px;
+      outline: none;
+      transition: border-color .15s, box-shadow .15s;
+      height: 42px
+    }
+
+    .inp:focus {
+      border-color: var(--ac);
+      box-shadow: 0 0 0 3px rgba(79, 110, 247, .1)
+    }
+
+    .inp::placeholder {
+      color: var(--mu)
+    }
+
+    .chip {
+      padding: 5px 13px;
+      border-radius: 7px;
+      font-size: 12px;
+      font-weight: 500;
+      background: var(--sf);
+      border: 1px solid var(--bd);
+      color: var(--tx2);
+      cursor: pointer;
+      transition: all .15s;
+      white-space: nowrap
+    }
+
+    .chip:hover {
+      border-color: var(--ac);
+      color: var(--ac);
+      background: var(--ac-s)
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 9px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      font-family: 'Geist Mono', monospace;
+      white-space: nowrap
+    }
+
+    .bpos {
+      background: var(--g-s);
+      color: var(--g);
+      border: 1px solid rgba(0, 212, 160, .2)
+    }
+
+    .bneg {
+      background: var(--ng-s);
+      color: var(--ng);
+      border: 1px solid rgba(255, 107, 107, .2)
+    }
+
+    .bneu {
+      background: rgba(74, 80, 107, .15);
+      color: var(--mu);
+      border: 1px solid rgba(74, 80, 107, .25)
+    }
+
+    .card {
+      background: var(--sf);
+      border: 1px solid var(--bd);
+      border-radius: 14px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: border-color .2s, transform .25s, box-shadow .25s;
+      position: relative;
+      z-index: 1;
+      cursor: pointer;
+      height: 100%
+    }
+
+    .card:hover {
+      border-color: rgba(79, 110, 247, .5);
+      transform: translateY(-4px);
+      box-shadow: 0 12px 40px rgba(79, 110, 247, .12), 0 2px 8px rgba(0, 0, 0, .4)
+    }
+
+    .cimg {
+      height: 154px;
+      overflow: hidden;
+      position: relative;
+      flex-shrink: 0
+    }
+
+    .cimg img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform .4s
+    }
+
+    .card:hover .cimg img {
+      transform: scale(1.04)
+    }
+
+    .cimg::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, transparent 40%, var(--sf))
+    }
+
+    .media-strip {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding: 2px 0 6px;
+      -ms-overflow-style: none
+    }
+
+    .media-strip::-webkit-scrollbar {
+      height: 0
+    }
+
+    .mthumb {
+      width: 76px;
+      height: 50px;
+      border-radius: 7px;
+      overflow: hidden;
+      flex-shrink: 0;
+      border: 1px solid var(--bd);
+      cursor: pointer;
+      transition: border-color .15s;
+      position: relative
+    }
+
+    .mthumb:hover {
+      border-color: var(--ac)
+    }
+
+    .mthumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover
+    }
+
+    .mlink {
+      width: 76px;
+      height: 50px;
+      border-radius: 7px;
+      background: var(--sf2);
+      border: 1px solid var(--bd);
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      cursor: pointer;
+      color: var(--mu);
+      transition: all .15s;
+      font-size: 9px;
+      font-weight: 600;
+      font-family: 'Geist Mono', monospace;
+      text-transform: uppercase;
+      letter-spacing: .04em
+    }
+
+    .mlink:hover {
+      border-color: var(--g);
+      color: var(--g)
+    }
+
+    .bkbtn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      z-index: 3;
+      background: rgba(8, 10, 15, .75);
+      border: 1px solid var(--bd2);
+      border-radius: 7px;
+      color: var(--mu);
+      cursor: pointer;
+      padding: 5px 7px;
+      font-size: 13px;
+      transition: all .15s;
+      backdrop-filter: blur(8px);
+      line-height: 1
+    }
+
+    .bkbtn:hover,
+    .bkbtn.on {
+      border-color: var(--g);
+      color: var(--g);
+      background: rgba(0, 212, 160, .12)
+    }
+
+    .hscroll {
+      display: flex;
+      overflow-x: auto;
+      gap: 14px;
+      padding-bottom: 8px;
+      scroll-snap-type: x mandatory;
+      -ms-overflow-style: none
+    }
+
+    .hscroll::-webkit-scrollbar {
+      height: 2px
+    }
+
+    .hcard {
+      min-width: 288px;
+      max-width: 288px;
+      flex-shrink: 0;
+      scroll-snap-align: start
+    }
+
+    .overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      background: rgba(0, 0, 0, .8);
+      backdrop-filter: blur(12px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      animation: fIn .18s ease
+    }
+
+    .mbox {
+      background: var(--sf);
+      border: 1px solid var(--bd2);
+      border-radius: 20px;
+      max-width: 680px;
+      width: 100%;
+      height: 90vh;
+      display: flex;
+      flex-direction: column;
+      animation: mUp .22s ease;
+      overflow: hidden
+    }
+
+    .mscroll {
+      flex: 1;
+      overflow-y: auto
+    }
+
+    .mscroll::-webkit-scrollbar {
+      width: 3px
+    }
+
+    .rpanel {
+      position: fixed;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: 340px;
+      z-index: 90;
+      background: var(--sf);
+      border-left: 1px solid var(--bd2);
+      display: flex;
+      flex-direction: column;
+      transform: translateX(100%);
+      transition: transform .3s cubic-bezier(.4, 0, .2, 1)
+    }
+
+    .rpanel.open {
+      transform: translateX(0)
+    }
+
+    .hero {
+      padding: 56px 32px 36px;
+      max-width: 1240px;
+      margin: 0 auto;
+      width: 100%
+    }
+
+    .eyebrow {
+      font-size: 10px;
+      font-weight: 600;
+      font-family: 'Geist Mono', monospace;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--ac);
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px
+    }
+
+    .eyebrow::before {
+      content: '';
+      width: 20px;
+      height: 1px;
+      background: var(--ac);
+      opacity: .6
+    }
+
+    .h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(36px, 5.5vw, 60px);
+      font-weight: 800;
+      line-height: 1.08;
+      letter-spacing: -.03em;
+      margin-bottom: 16px
+    }
+
+    .h1 em {
+      font-style: italic;
+      background: linear-gradient(135deg, var(--ac), var(--g));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent
+    }
+
+    .empty-st {
+      text-align: center;
+      padding: 80px 24px
+    }
+
+    .e-icon {
+      width: 64px;
+      height: 64px;
+      border-radius: 18px;
+      background: var(--sf2);
+      border: 1px solid var(--bd);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px
+    }
+
+    .skel {
+      background: linear-gradient(90deg, var(--sf2) 25%, var(--sf3) 50%, var(--sf2) 75%);
+      background-size: 400px 100%;
+      animation: shimmer 1.4s infinite;
+      border-radius: 8px
+    }
+
+    .sdot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--g);
+      display: inline-block;
+      animation: dPulse 2s infinite
+    }
+
+    footer {
+      border-top: 1px solid var(--bd);
+      padding: 20px 32px;
+      text-align: center;
+      font-size: 10px;
+      color: var(--mu);
+      font-family: 'Geist Mono', monospace;
+      letter-spacing: .07em;
+      text-transform: uppercase;
+      margin-top: 48px
+    }
+
+    .wbar {
+      width: 2px;
+      border-radius: 2px;
+      background: var(--g);
+      display: inline-block
+    }
+
+    .wbar:nth-child(1) {
+      animation: wave .8s ease-in-out infinite;
+      height: 7px
+    }
+
+    .wbar:nth-child(2) {
+      animation: wave .8s ease-in-out infinite .1s;
+      height: 11px
+    }
+
+    .wbar:nth-child(3) {
+      animation: wave .8s ease-in-out infinite .2s;
+      height: 7px
+    }
+
+    .wbar:nth-child(4) {
+      animation: wave .8s ease-in-out infinite .3s;
+      height: 13px
+    }
+
+    .wbar:nth-child(5) {
+      animation: wave .8s ease-in-out infinite .1s;
+      height: 7px
+    }
+
+    @keyframes fIn {
+      from {
+        opacity: 0
+      }
+
+      to {
+        opacity: 1
+      }
+    }
+
+    @keyframes mUp {
+      from {
+        opacity: 0;
+        transform: translateY(16px) scale(.98)
+      }
+
+      to {
+        opacity: 1;
+        transform: none
+      }
+    }
+
+    @keyframes fUp {
+      from {
+        opacity: 0;
+        transform: translateY(12px)
+      }
+
+      to {
+        opacity: 1;
+        transform: none
+      }
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg)
+      }
+    }
+
+    @keyframes rPulse {
+
+      0%,
+      100% {
+        box-shadow: 0 0 0 0 rgba(255, 107, 107, .4)
+      }
+
+      50% {
+        box-shadow: 0 0 0 7px rgba(255, 107, 107, 0)
+      }
+    }
+
+    @keyframes wave {
+
+      0%,
+      100% {
+        transform: scaleY(1)
+      }
+
+      50% {
+        transform: scaleY(2.4)
+      }
+    }
+
+    @keyframes shimmer {
+      from {
+        background-position: -400px 0
+      }
+
+      to {
+        background-position: 400px 0
+      }
+    }
+
+    @keyframes dPulse {
+
+      0%,
+      100% {
+        opacity: 1
+      }
+
+      50% {
+        opacity: .4
+      }
+    }
+
+    .fup {
+      animation: fUp .3s ease both
+    }
+
+    .spin-a {
+      animation: spin .7s linear infinite
+    }
+  </style>
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useState, useEffect, useRef, useCallback } = React;
+
+    /* ── Helpers ── */
+    const Sent = ({ s }) => <span className={`badge ${s === 'Positive' ? 'bpos' : s === 'Negative' ? 'bneg' : 'bneu'}`}>{s === 'Positive' ? '▲' : s === 'Negative' ? '▼' : '—'} {s}</span>;
+    const Spin = () => <svg className="spin-a" width="13" height="13" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" opacity=".25" /><path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" strokeWidth="3" strokeLinecap="round" /></svg>;
+    const Waves = () => <div style={{ display: 'flex', alignItems: 'center', gap: 2 }}>{[1, 2, 3, 4, 5].map(i => <span key={i} className="wbar" />)}</div>;
+
+    /* ── Best female TTS voice ── */
+    function bestVoice() {
+      const vv = window.speechSynthesis?.getVoices() || [];
+      const prefer = ['Samantha', 'Karen', 'Moira', 'Tessa', 'Fiona', 'Ava', 'Victoria', 'Allison', 'Susan', 'Zira', 'Hazel'];
+      for (const n of prefer) { const v = vv.find(v => v.name.includes(n) && v.lang.startsWith('en')); if (v) return v; }
+      return vv.find(v => v.lang.startsWith('en') && /female/i.test(v.name)) || vv.find(v => v.lang.startsWith('en')) || null;
+    }
+
+    /* ── Donut Chart ── */
+    const Donut = ({ data, label }) => {
+      const ref = useRef(), ch = useRef();
+      useEffect(() => {
+        if (!ref.current) return;
+        ch.current?.destroy();
+        ch.current = new Chart(ref.current, { type: 'doughnut', data: { labels: ['Positive', 'Negative', 'Neutral'], datasets: [{ data: [data.Positive || 0, data.Negative || 0, data.Neutral || 0], backgroundColor: ['#00d4a0', '#ff6b6b', '#1c2035'], borderWidth: 0, hoverOffset: 4 }] }, options: { cutout: '74%', plugins: { legend: { display: false } }, animation: { duration: 700 } } });
+        return () => ch.current?.destroy();
+      }, [data]);
+      const tot = (data.Positive || 0) + (data.Negative || 0) + (data.Neutral || 0);
+      return <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 7 }}>
+        <div style={{ position: 'relative', width: 68, height: 68 }}>
+          <canvas ref={ref} width="68" height="68" />
+          <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 700, fontFamily: "'Geist Mono',monospace" }}>{tot}</div>
+        </div>
+        <span style={{ fontSize: 9.5, color: 'var(--mu)', textAlign: 'center', maxWidth: 72, lineHeight: 1.4, fontFamily: "'Geist Mono',monospace", textTransform: 'uppercase', letterSpacing: '.06em' }}>{label}</span>
+      </div>;
+    };
+
+    /* ── Edge-style Media Previews ── */
+    const MediaPrev = ({ article, stopProp = false }) => {
+      const imgs = [article.image].filter(Boolean);
+      let domain = null;
+      try { if (article.url) domain = new URL(article.url).hostname; } catch { }
+
+      const stop = e => { if (stopProp) e.stopPropagation(); };
+
+      if (!imgs.length && !domain && !article.video) return null;
+
+      return <div className="media-strip">
+
+        {/* images */}
+        {imgs.map((src, i) =>
+          <div key={i} className="mthumb" onClick={e => { stop(e); window.open(article.url, '_blank'); }}>
+            <img src={src} alt="" onError={e => e.target.parentElement.style.display = 'none'} />
+          </div>
+        )}
+
+        {/* VIDEO PREVIEW (your iframe added properly) */}
+        {article.video && (() => {
+          let vid = null;
+          try {
+            const url = new URL(article.video);
+            vid = url.searchParams.get("v");
+          } catch { }
+
+          if (!vid) return null;
+
+          return (
+            <div className="mthumb" onClick={stop}>
+              <iframe
+                width="100%"
+                height="100%"
+                src={`https://www.youtube.com/embed/${vid}?autoplay=1&mute=1&controls=0&loop=1&playlist=${vid}`}
+                frameBorder="0"
+                allow="autoplay"
+                style={{ border: 'none' }}
+              />
+            </div>
+          );
+        })()}
+
+        {/* link */}
+        {domain &&
+          <div className="mlink" onClick={e => { stop(e); window.open(article.url, '_blank'); }}>
+            <img src={`https://www.google.com/s2/favicons?sz=32&domain=${domain}`} alt="" style={{ width: 16, height: 16, borderRadius: 3 }} onError={e => e.target.style.display = 'none'} />
+            <span>Open</span>
+          </div>
+        }
+
+      </div>;
+    };
+
+    /* ── Article Card ── */
+    const Card = ({ a, idx, onClick, marks, toggle }) => {
+      const saved = marks.some(b => b.url === a.url);
+      return <div className="card fup" style={{ animationDelay: `${idx * 35}ms` }} onClick={() => onClick(a)}>
+        {a.image && <div className="cimg"><img src={a.image} alt="" onError={e => e.target.parentElement.style.display = 'none'} /></div>}
+        <button className={`bkbtn${saved ? ' on' : ''}`} onClick={e => { e.stopPropagation(); toggle(a); }} title={saved ? 'Remove' : 'Save'}>{saved ? '★' : '☆'}</button>
+        <div style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 8, flex: 1 }}>
+          <h3 style={{ fontSize: 13, fontWeight: 600, lineHeight: 1.5, color: 'var(--tx)', letterSpacing: '-.01em' }}>{a.title}</h3>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+            <Sent s={a.sentiment} score={a.score} />
+            <span style={{ fontSize: 11, color: 'var(--mu)' }}>{a.source}</span>
+            {a.pubDate && <><span style={{ color: 'var(--bd2)', fontSize: 10 }}>·</span><span style={{ fontSize: 11, color: 'var(--mu)' }}>{a.pubDate}</span></>}
+            {a.subtopic && a.subtopic !== 'General' && <span style={{ fontSize: 9, fontWeight: 700, fontFamily: "'Geist Mono',monospace", color: 'var(--g)', background: 'var(--g-s)', border: '1px solid rgba(0,212,160,.15)', padding: '2px 7px', borderRadius: 4, textTransform: 'uppercase', letterSpacing: '.06em', marginLeft: 'auto' }}>{a.subtopic}</span>}
+          </div>
+          <p style={{ fontSize: 12.5, lineHeight: 1.65, color: 'var(--tx2)', flex: 1 }}>{a.summary}</p>
+          <MediaPrev article={a} stopProp={true} />
+          {a.has_video &&
+            <span style={{
+              display: 'inline-flex', alignItems: 'center', gap: 4,
+              fontSize: 9, fontWeight: 700, fontFamily: "'Geist Mono',monospace",
+              color: '#ff0000', background: 'rgba(255,0,0,0.08)',
+              border: '1px solid rgba(255,0,0,0.2)',
+              padding: '2px 7px', borderRadius: 4,
+              textTransform: 'uppercase', letterSpacing: '.06em',
+              width: 'fit-content'
+            }}>
+              ▶ Video
+            </span>
+          }
+          <p style={{ fontSize: 11, color: 'var(--ac)', opacity: .75, display: 'flex', alignItems: 'center', gap: 4, fontWeight: 600, marginTop: 2 }}>Deep analysis <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14M12 5l7 7-7 7" /></svg></p>
+        </div>
+      </div>;
+    };
+
+    /* ── Detail Modal ── */
+    const Modal = ({ article, onClose, marks, toggle }) => {
+      const [detail, setDetail] = useState('');
+      const [loading, setLoading] = useState(true);
+      const [speaking, setSpeaking] = useState(false);
+      const [videoId, setVideoId] = useState(null);
+      const [mediaReady, setMediaReady] = useState(false);
+      const saved = marks.some(b => b.url === article.url);
+      useEffect(() => {
+        // fetch AI detail text
+        (async () => {
+          try {
+            const p = new URLSearchParams({
+              title: article.title,
+              desc: article.description,
+              url: article.url || ''
+            });
+            const d = await (await fetch(`/api/detail?${p}`)).json();
+            setDetail(d.detailed || article.description);
+          } catch {
+            setDetail(article.description);
+          }
+          setLoading(false);
+        })();
+
+        // fetch YouTube lazily — fires in parallel, doesn't block detail text
+        (async () => {
+          try {
+            const p = new URLSearchParams({ q: article.title });
+            const d = await (await fetch(`/api/youtube?${p}`)).json();
+            if (d.video_id) setVideoId(d.video_id); // found → store it
+          } catch {
+            // silently fail — image fallback handles it
+          }
+          setMediaReady(true); // skeleton lifts regardless of outcome
+        })();
+
+        return () => window.speechSynthesis?.cancel();
+      }, []);
+      const speak = () => {
+        if (!window.speechSynthesis) return;
+        if (speaking) { window.speechSynthesis.cancel(); setSpeaking(false); return; }
+        const go = () => {
+          const utt = new SpeechSynthesisUtterance(`${article.title}. ${detail || article.summary}`);
+          const v = bestVoice(); if (v) utt.voice = v;
+          utt.rate = 0.92; utt.pitch = 1.05;
+          utt.onend = utt.onerror = () => setSpeaking(false);
+          window.speechSynthesis.speak(utt); setSpeaking(true);
+        };
+        window.speechSynthesis.getVoices().length > 0 ? go() : (window.speechSynthesis.onvoiceschanged = go);
+      };
+      return <div className="overlay" onClick={e => { if (e.target === e.currentTarget) { window.speechSynthesis?.cancel(); onClose(); } }}>
+        <div className="mbox">
+          <div className="mscroll">
+            {/* Media section — skeleton → video or image */}
+            <div style={{
+              borderRadius: '20px 20px 0 0',
+              overflow: 'hidden',
+              background: 'var(--sf2)',
+              // 16:9 when video, fixed height when image, nothing if no media
+              ...(videoId
+                ? { position: 'relative', paddingTop: '56.25%' }
+                : { height: article.image ? 210 : 0 })
+            }}>
+
+              {/* Skeleton — shows until mediaReady flips */}
+              {!mediaReady &&
+                <div className="skel" style={{
+                  position: 'absolute', inset: 0,
+                  borderRadius: 0
+                }} />
+              }
+
+              {/* Once ready — video takes priority over image */}
+              {mediaReady && (
+                videoId
+                  ? <iframe
+                    src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1`}
+                    style={{
+                      position: 'absolute', top: 0, left: 0,
+                      width: '100%', height: '100%', border: 'none'
+                    }}
+                    allow="autoplay; encrypted-media"
+                    allowFullScreen
+                  />
+                  : article.image &&
+                  <>
+                    <img
+                      src={article.image} alt=""
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      onError={e => e.target.parentElement.style.display = 'none'}
+                    />
+                    <div style={{
+                      position: 'absolute', inset: 0,
+                      background: 'linear-gradient(to bottom, transparent 35%, var(--sf))'
+                    }} />
+                  </>
+              )}
+
+            </div>
+            <div style={{ padding: '24px 28px 12px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 14, marginBottom: 14 }}>
+                <h2 style={{ fontFamily: "'Playfair Display',serif", fontWeight: 700, fontSize: 20, lineHeight: 1.3, color: 'var(--tx)', flex: 1, letterSpacing: '-.02em' }}>{article.title}</h2>
+                <button onClick={onClose} style={{ background: 'var(--sf2)', border: '1px solid var(--bd)', borderRadius: 8, color: 'var(--mu)', cursor: 'pointer', padding: '6px 10px', fontSize: 14, flexShrink: 0, lineHeight: 1 }}>✕</button>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
+                <Sent s={article.sentiment} score={article.score} />
+                {article.source && <span style={{ fontSize: 12, color: 'var(--mu)' }}>{article.source}</span>}
+                {article.pubDate && <><span style={{ color: 'var(--bd2)', fontSize: 10 }}>·</span><span style={{ fontSize: 12, color: 'var(--mu)' }}>{article.pubDate}</span></>}
+                {article.subtopic && article.subtopic !== 'General' && <span style={{ fontSize: 9, fontWeight: 700, fontFamily: "'Geist Mono',monospace", color: 'var(--g)', background: 'var(--g-s)', border: '1px solid rgba(0,212,160,.15)', padding: '2px 8px', borderRadius: 5, textTransform: 'uppercase', letterSpacing: '.06em' }}>{article.subtopic}</span>}
+              </div>
+              {article.image && <div style={{ marginBottom: 16 }}><MediaPrev article={article} /></div>}
+              <p style={{ fontSize: 10, fontWeight: 600, fontFamily: "'Geist Mono',monospace", textTransform: 'uppercase', letterSpacing: '.1em', color: 'var(--mu)', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span style={{ width: 16, height: 1, background: 'var(--mu)', opacity: .5 }} />AI Deep Analysis
+              </p>
+              {loading
+                ? <div style={{ display: 'flex', flexDirection: 'column', gap: 10, padding: '24px 0' }}>{[90, 75, 85, 60].map((w, i) => <div key={i} className="skel" style={{ height: 14, width: `${w}%` }} />)}</div>
+                : <div style={{ fontSize: 14, lineHeight: 1.9, color: 'var(--tx2)', fontWeight: 300 }}>
+                  {detail.split('\n').map((line, i) => {
+                    if (line.startsWith('**') && line.endsWith('**')) return <p key={i} style={{ fontFamily: "'Geist',sans-serif", fontWeight: 600, fontSize: 10, textTransform: 'uppercase', letterSpacing: '.1em', color: 'var(--g)', marginTop: i === 0 ? 0 : 28, marginBottom: 10, display: 'flex', alignItems: 'center', gap: 8 }}><span style={{ width: 12, height: 1, background: 'var(--g)', opacity: .5 }} />{line.replace(/\*\*/g, '')}</p>;
+                    if (!line.trim()) return null;
+                    return <p key={i} style={{ marginBottom: 12 }}>{line}</p>;
+                  })}
+                </div>}
+            </div>
+          </div>
+          <div style={{ padding: '14px 24px', borderTop: '1px solid var(--bd)', background: 'var(--sf)', borderRadius: '0 0 20px 20px', display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', flexShrink: 0 }}>
+            <button onClick={speak} className={`btn bg${speaking ? ' on' : ''}`}>{speaking ? <><Waves /> Stop</> : <><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" /><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07" /></svg> Read Aloud</>}</button>
+            <button onClick={() => toggle(article)} className={`btn bg${saved ? ' on' : ''}`}>{saved ? '★ Saved' : '☆ Save'}</button>
+            <a href={article.url} target="_blank" rel="noopener" className="btn bp2" style={{ marginLeft: 'auto', height: 36, fontSize: 12, textDecoration: 'none', borderRadius: 9 }}>Read Original <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3" /></svg></a>
+          </div>
+        </div>
+      </div>;
+    };
+
+    /* ── Reading Panel ── */
+    const ReadPanel = ({ open, onClose, marks, remove, onCardClick }) => <div className={`rpanel${open ? ' open' : ''}`}>
+      <div style={{ padding: '20px', borderBottom: '1px solid var(--bd)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
+        <div>
+          <h2 style={{ fontFamily: "'Playfair Display',serif", fontWeight: 700, fontSize: 16, letterSpacing: '-.02em' }}>Reading List</h2>
+          <p style={{ fontSize: 11, color: 'var(--mu)', marginTop: 3, fontFamily: "'Geist Mono',monospace" }}>{marks.length} article{marks.length !== 1 ? 's' : ''} saved</p>
+        </div>
+        <button onClick={onClose} style={{ background: 'transparent', border: '1px solid var(--bd)', borderRadius: 8, color: 'var(--mu)', cursor: 'pointer', padding: '5px 9px', fontSize: 13 }}>✕</button>
+      </div>
+      <div style={{ flex: 1, overflowY: 'auto', padding: '12px' }}>
+        {marks.length === 0
+          ? <div style={{ textAlign: 'center', padding: '48px 16px', color: 'var(--mu)' }}>
+            <div style={{ fontSize: 28, marginBottom: 10, opacity: .4 }}>☆</div>
+            <p style={{ fontWeight: 600, fontSize: 13, color: 'var(--tx2)' }}>No saved articles yet</p>
+            <p style={{ fontSize: 12, marginTop: 6 }}>Tap the star on any article.</p>
+          </div>
+          : marks.map((a, i) => <div key={i} style={{ background: 'var(--sf2)', border: '1px solid var(--bd)', borderRadius: 11, padding: '12px', marginBottom: 8, cursor: 'pointer' }} onClick={() => onCardClick(a)}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
+              <div style={{ flex: 1 }}>
+                <p style={{ fontSize: 12, fontWeight: 600, lineHeight: 1.45, marginBottom: 5, letterSpacing: '-.01em' }}>{a.title}</p>
+                <div style={{ display: 'flex', gap: 6 }}><span style={{ fontSize: 10, color: 'var(--mu)' }}>{a.source}</span>{a.pubDate && <span style={{ fontSize: 10, color: 'var(--mu)' }}>{a.pubDate}</span>}</div>
+              </div>
+              <button onClick={e => { e.stopPropagation(); remove(a.url); }} style={{ background: 'transparent', border: 'none', color: 'var(--g)', cursor: 'pointer', fontSize: 15 }}>★</button>
+            </div>
+          </div>)}
+      </div>
+    </div>;
+
+    /* ── App ── */
+    const TOPICS = ['AI', 'Technology', 'Business', 'Science', 'Health', 'Sports', 'Climate', 'Politics', 'Entertainment'];
+
+    function App() {
+      const [topic, setTopic] = useState('');
+      const [groups, setGroups] = useState({});
+      const [chart, setChart] = useState({});
+      const [meta, setMeta] = useState(null);
+      const [loading, setLoading] = useState(false);
+      const [error, setError] = useState('');
+      const [started, setStarted] = useState(false);
+      const [sel, setSel] = useState(null);
+      const [marks, setMarks] = useState(() => { try { return JSON.parse(localStorage.getItem('snbm') || '[]') } catch { return [] } });
+      const [showRead, setShowRead] = useState(false);
+      const [rec, setRec] = useState(false);
+      const recRef = useRef();
+
+      useEffect(() => { try { localStorage.setItem('snbm', JSON.stringify(marks)) } catch { } }, [marks]);
+      const toggle = useCallback(a => setMarks(p => p.some(b => b.url === a.url) ? p.filter(b => b.url !== a.url) : [...p, a]), []);
+      const remove = useCallback(url => setMarks(p => p.filter(b => b.url !== url)), []);
+
+      const fetchNews = useCallback(async (t = topic) => {
+        setLoading(true); setError(''); setStarted(true);
+        try { const d = await (await fetch(`/api/news?${new URLSearchParams({ topic: t })}`)).json(); setGroups(d.groups || {}); setChart(d.chart_data || {}); setMeta(d.meta || null); }
+        catch (e) { setError(e.message); }
+        setLoading(false);
+      }, [topic]);
+
+      const onChip = t => { setTopic(t); fetchNews(t); };
+
+      const startVoice = () => {
+        const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SR) { alert('Voice recognition requires Chrome or Edge.'); return; }
+        if (rec) { recRef.current?.stop(); setRec(false); return; }
+
+        const r = new SR();
+        r.lang = 'en-US';
+        r.interimResults = false;
+        r.continuous = false;
+
+        let resultCaught = false; // 👈 flag to track if we got a result
+
+        r.onresult = e => {
+          resultCaught = true;
+          const t = e.results[0][0].transcript
+            .trim()
+            .replace(/[.,!?;:]+$/, '') // remove trailing punctuation;
+          setTopic(t);
+          setRec(false);
+          fetchNews(t);
+        };
+
+        r.onerror = () => setRec(false);
+
+        r.onend = () => {
+          setRec(false);
+          // Edge sometimes fires onend before onresult
+          // so we do nothing here — onresult handles the fetch
+        };
+
+        r.start();
+        recRef.current = r;
+        setRec(true);
+      };
+
+      const total = Object.values(groups).reduce((s, g) => s + g.length, 0);
+      const bySub = arts => {
+        const m = {};
+        arts.forEach(a => { const k = (a.subtopic && a.subtopic !== 'General') ? a.subtopic : '__'; if (!m[k]) m[k] = []; if (m[k].length < 6) m[k].push(a); });
+        return m;
+      };
+
+      return <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', position: 'relative', zIndex: 1 }}>
+
+        <nav className="nav">
+          <div className="logo-mark">S</div>
+          <span style={{ fontWeight: 600, fontSize: 14, letterSpacing: '-.01em', flexShrink: 0 }}>Smart News</span>
+          <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}>
+            {meta && <span style={{ fontSize: 10, color: 'var(--mu)', fontFamily: "'Geist Mono',monospace", textTransform: 'uppercase', letterSpacing: '.07em', display: 'flex', alignItems: 'center', gap: 6, whiteSpace: 'nowrap' }}><span className="sdot" />{meta.topic}</span>}
+            <button className={`btn bi${showRead ? ' on' : ''}`} onClick={() => setShowRead(v => !v)} title="Reading list" style={{ position: 'relative' }}>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" /></svg>
+              {marks.length > 0 && <span style={{ position: 'absolute', top: -5, right: -5, background: 'var(--g)', color: '#000', borderRadius: 99, fontSize: 9, fontWeight: 800, padding: '1px 5px', fontFamily: "'Geist Mono',monospace", lineHeight: 1.5 }}>{marks.length}</span>}
+            </button>
+          </div>
+        </nav>
+
+        <div className="hero">
+          <p className="eyebrow">AI-Powered News Intelligence</p>
+          <h1 className="h1">Today's World,<br /><em>Explained Your Way</em></h1>
+          <p style={{ fontSize: 15, color: 'var(--tx2)', lineHeight: 1.7, maxWidth: 500, marginBottom: 32, fontWeight: 300 }}>Fetch any topic and get AI-summarised articles grouped by theme — with sentiment analysis, voice search, and read-aloud.</p>
+
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'flex-end', marginBottom: 18 }}>
+            <div style={{ flex: 1, minWidth: 220 }}>
+              <label style={{ fontSize: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.1em', color: 'var(--mu)', fontFamily: "'Geist Mono',monospace", display: 'block', marginBottom: 7 }}>Topic</label>
+              <input value={topic} onChange={e => setTopic(e.target.value)} onKeyDown={e => e.key === 'Enter' && fetchNews()} placeholder="e.g. AI, climate, bitcoin…" className="inp" style={{ width: '100%' }} />
+            </div>
+            <button className={`btn bi${rec ? ' rec' : ''}`} onClick={startVoice} style={{ width: 42, height: 42 }}>
+              {rec ? <svg width="14" height="14" viewBox="0 0 24 24" fill="var(--ng)"><rect x="6" y="6" width="12" height="12" rx="2" /></svg> : <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" /><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8" /></svg>}
+            </button>
+            <button onClick={() => fetchNews()} disabled={loading} className="btn bp2">{loading ? <><Spin />Fetching…</> : 'Get News'}</button>
+          </div>
+
+          {rec && <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14, fontSize: 12, color: 'var(--ng)', fontWeight: 600 }}><span style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--ng)', animation: 'rPulse 1s infinite' }} />Listening… speak your topic</div>}
+
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 7, alignItems: 'center' }}>
+            <span style={{ fontSize: 10, color: 'var(--mu)', fontFamily: "'Geist Mono',monospace", fontWeight: 600, letterSpacing: '.06em', textTransform: 'uppercase', marginRight: 2 }}>Recommended:</span>
+            {TOPICS.map(t => <button key={t} className="chip" onClick={() => onChip(t)}>{t}</button>)}
+          </div>
+        </div>
+
+        {error && <div style={{ maxWidth: 1240, margin: '0 auto 16px', width: '100%', padding: '0 32px' }}>
+          <div style={{ background: 'rgba(255,107,107,.08)', border: '1px solid rgba(255,107,107,.2)', color: 'var(--ng)', borderRadius: 11, padding: '11px 16px', fontSize: 13, display: 'flex', alignItems: 'center', gap: 8 }}>⚠ {error}</div>
+        </div>}
+
+        {!loading && Object.keys(chart).length > 0 && <div style={{ maxWidth: 1240, margin: '0 auto 36px', width: '100%', padding: '0 32px' }}>
+          <div style={{ background: 'var(--sf)', border: '1px solid var(--bd)', borderRadius: 16, padding: '20px 24px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
+              <div><h2 style={{ fontSize: 12, fontWeight: 600, letterSpacing: '-.01em', fontFamily: "'Geist',sans-serif" }}>Sentiment Overview</h2><p style={{ fontSize: 10, color: 'var(--mu)', marginTop: 2, fontFamily: "'Geist Mono',monospace" }}>{total} articles</p></div>
+              <div style={{ display: 'flex', gap: 14 }}>{[['var(--g)', 'Positive'], ['var(--ng)', 'Negative'], ['var(--bd2)', 'Neutral']].map(([c, l]) => <span key={l} style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 10.5, color: 'var(--mu)', fontFamily: "'Geist Mono',monospace" }}><span style={{ width: 7, height: 7, borderRadius: '50%', background: c }} />{l}</span>)}</div>
+            </div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 20, justifyContent: 'center' }}>{Object.entries(chart).map(([g, d]) => <Donut key={g} data={d} label={g} />)}</div>
+          </div>
+        </div>}
+
+        <div style={{ maxWidth: 1240, margin: '0 auto', width: '100%', padding: '0 32px', flex: 1 }}>
+          {!loading && Object.entries(groups).map(([group, articles]) => {
+            const sub = bySub(articles);
+            return <div key={group} style={{ marginBottom: 56 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20, paddingBottom: 14, borderBottom: '1px solid var(--bd)' }}>
+                <h2 style={{ fontFamily: "'Playfair Display',serif", fontSize: 22, fontWeight: 700, letterSpacing: '-.02em' }}>{group}</h2>
+                <span style={{ fontSize: 11, background: 'var(--sf2)', border: '1px solid var(--bd)', color: 'var(--mu)', padding: '2px 9px', borderRadius: 20, fontFamily: "'Geist Mono',monospace" }}>{articles.length}</span>
+              </div>
+              {Object.entries(sub).map(([k, arts]) => <div key={k} style={{ marginBottom: 32 }}>
+                {k !== '__' && <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
+                  <span style={{ fontSize: 10, fontWeight: 600, fontFamily: "'Geist',sans-serif", textTransform: 'uppercase', letterSpacing: '.1em', color: 'var(--g)' }}>{k}</span>
+                  <div style={{ flex: 1, height: 1, background: 'var(--bd)' }} />
+                  <span style={{ fontSize: 10, color: 'var(--mu)', fontFamily: "'Geist Mono',monospace" }}>{arts.length}</span>
+                </div>}
+                <div className="hscroll">{arts.map((a, i) => <div key={i} className="hcard"><Card a={a} idx={i} onClick={setSel} marks={marks} toggle={toggle} /></div>)}</div>
+              </div>)}
+            </div>;
+          })}
+
+          {!loading && started && total === 0 && !error && <div className="empty-st"><div className="e-icon">📭</div><h2 style={{ fontFamily: "'Playfair Display',serif", fontSize: 22, fontWeight: 700, marginBottom: 8 }}>No articles found</h2><p style={{ fontSize: 14, color: 'var(--mu)' }}>Try a different topic or check your API key.</p></div>}
+
+          {!started && <div className="empty-st">
+            <div className="e-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--ac)" strokeWidth="1.5"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" /></svg></div>
+            <h2 style={{ fontFamily: "'Playfair Display',serif", fontSize: 22, fontWeight: 700, marginBottom: 8 }}>Pick a topic, get the news</h2>
+            <p style={{ fontSize: 14, color: 'var(--mu)' }}>Type a topic above, tap a recommendation, or try voice search.</p>
+          </div>}
+        </div>
+
+        <footer>Smart News · NewsAPI · Claude AI · Sentiment · NLP</footer>
+
+        {sel && <Modal article={sel} onClose={() => setSel(null)} marks={marks} toggle={toggle} />}
+        <ReadPanel open={showRead} onClose={() => setShowRead(false)} marks={marks} remove={remove} onCardClick={a => setSel(a)} />
+        {showRead && <div onClick={() => setShowRead(false)} style={{ position: 'fixed', inset: 0, zIndex: 80, background: 'rgba(0,0,0,.35)', backdropFilter: 'blur(2px)' }} />}
+      </div>;
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+
+</html>

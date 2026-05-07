@@ -1,0 +1,1030 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smart News — AI-Powered</title>
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap"
+    rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #08090c;
+      --surface: #0f1117;
+      --surface2: #13161f;
+      --border: #1e2130;
+      --border2: #262b3d;
+      --accent: #5b6af0;
+      --accent2: #3ecf8e;
+      --text: #e8eaf2;
+      --muted: #5a5f7a;
+      --neg: #f56565;
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+    }
+
+    h1,
+    h2,
+    h3,
+    .syne {
+      font-family: 'Syne', sans-serif;
+    }
+
+    ::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 4px;
+    }
+
+    /* Noise overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+      opacity: .4;
+    }
+
+    /* Card */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: border-color .2s, transform .2s, box-shadow .2s;
+      position: relative;
+      z-index: 1;
+      cursor: pointer;
+    }
+
+    .card:hover {
+      border-color: var(--accent);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 32px rgba(91, 106, 240, .15);
+    }
+
+    /* Sentiment badge */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 9px;
+      border-radius: 99px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .badge-pos {
+      background: rgba(62, 207, 142, .12);
+      color: #3ecf8e;
+      border: 1px solid rgba(62, 207, 142, .25);
+    }
+
+    .badge-neg {
+      background: rgba(245, 101, 101, .12);
+      color: #f56565;
+      border: 1px solid rgba(245, 101, 101, .25);
+    }
+
+    .badge-neu {
+      background: rgba(90, 95, 122, .2);
+      color: #7a80a0;
+      border: 1px solid rgba(90, 95, 122, .3);
+    }
+
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(14px);
+      }
+
+      to {
+        opacity: 1;
+        transform: none;
+      }
+    }
+
+    .fade-up {
+      animation: fadeUp .35s ease both;
+    }
+
+    /* Input */
+    .inp {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 16px;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      outline: none;
+      transition: border-color .15s;
+    }
+
+    .inp:focus {
+      border-color: var(--accent);
+    }
+
+    .inp::placeholder {
+      color: var(--muted);
+    }
+
+    /* Button */
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      padding: 10px 24px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: 'Syne', sans-serif;
+      letter-spacing: .04em;
+      transition: all .15s;
+      box-shadow: 0 0 20px rgba(91, 106, 240, .3);
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: #6e7cf5;
+      box-shadow: 0 0 28px rgba(91, 106, 240, .45);
+    }
+
+    .btn-primary:disabled {
+      opacity: .5;
+      cursor: not-allowed;
+    }
+
+    /* Icon button */
+    .btn-icon {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all .15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 38px;
+      height: 38px;
+      flex-shrink: 0;
+    }
+
+    .btn-icon:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .btn-icon.active {
+      background: rgba(91, 106, 240, .15);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .btn-icon.recording {
+      background: rgba(245, 101, 101, .15);
+      border-color: #f56565;
+      color: #f56565;
+      animation: pulse 1s infinite;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        box-shadow: 0 0 0 0 rgba(245, 101, 101, .4);
+      }
+
+      50% {
+        box-shadow: 0 0 0 6px rgba(245, 101, 101, 0);
+      }
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .spin {
+      animation: spin .7s linear infinite;
+    }
+
+    /* Topic chip */
+    .topic-chip {
+      padding: 5px 12px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 600;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      cursor: pointer;
+      transition: all .15s;
+      font-family: 'Syne', sans-serif;
+    }
+
+    .topic-chip:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* Subtopic chip */
+    .sub-chip {
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 10px;
+      font-weight: 700;
+      background: transparent;
+      border: 1px solid var(--border2);
+      color: var(--muted);
+      cursor: pointer;
+      transition: all .15s;
+      font-family: 'Syne', sans-serif;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+
+    .sub-chip:hover,
+    .sub-chip.active {
+      border-color: var(--accent2);
+      color: var(--accent2);
+      background: rgba(62, 207, 142, .08);
+    }
+
+    /* Donut */
+    .donut-wrap {
+      position: relative;
+    }
+
+    .donut-center {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+      font-family: 'Syne', sans-serif;
+    }
+
+    /* Bookmark btn on card */
+    .bookmark-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      z-index: 3;
+      background: rgba(8, 9, 12, .7);
+      border: 1px solid var(--border2);
+      border-radius: 8px;
+      color: var(--muted);
+      cursor: pointer;
+      padding: 5px 7px;
+      font-size: 14px;
+      transition: all .15s;
+      backdrop-filter: blur(6px);
+    }
+
+    .bookmark-btn:hover {
+      border-color: var(--accent2);
+      color: var(--accent2);
+    }
+
+    .bookmark-btn.saved {
+      color: var(--accent2);
+      border-color: var(--accent2);
+      background: rgba(62, 207, 142, .1);
+    }
+
+    /* Modal overlay */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      background: rgba(0, 0, 0, .75);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      animation: fadeIn .2s ease;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
+    }
+
+    .modal-box {
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: 20px;
+      max-width: 680px;
+      width: 100%;
+      height: 90vh;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      animation: slideUp .25s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .modal-scroll {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    .modal-scroll::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .modal-scroll::-webkit-scrollbar-thumb {
+      background: var(--border2);
+      border-radius: 4px;
+    }
+
+    .modal-scroll::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: none;
+      }
+    }
+
+    /* Reading list panel */
+    .reading-panel {
+      position: fixed;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: 360px;
+      z-index: 90;
+      background: var(--surface);
+      border-left: 1px solid var(--border2);
+      display: flex;
+      flex-direction: column;
+      transform: translateX(100%);
+      transition: transform .3s ease;
+    }
+
+    .reading-panel.open {
+      transform: translateX(0);
+    }
+
+    /* Subtopic horizontal scroll row */
+    .subtopic-row {
+      display: flex;
+      overflow-x: auto;
+      gap: 16px;
+      padding-bottom: 10px;
+      scroll-snap-type: x mandatory;
+      -ms-overflow-style: none;
+    }
+
+    .subtopic-row::-webkit-scrollbar {
+      height: 3px;
+    }
+
+    .subtopic-row::-webkit-scrollbar-thumb {
+      background: var(--border2);
+      border-radius: 3px;
+    }
+
+    .subtopic-row::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    /* TTS waveform indicator */
+    @keyframes wave {
+
+      0%,
+      100% {
+        transform: scaleY(1);
+      }
+
+      50% {
+        transform: scaleY(2.2);
+      }
+    }
+
+    .wave-bar {
+      width: 3px;
+      border-radius: 2px;
+      background: var(--accent2);
+      display: inline-block;
+    }
+
+    .wave-bar:nth-child(1) {
+      animation: wave 0.8s ease-in-out infinite;
+      height: 8px;
+    }
+
+    .wave-bar:nth-child(2) {
+      animation: wave 0.8s ease-in-out infinite .1s;
+      height: 12px;
+    }
+
+    .wave-bar:nth-child(3) {
+      animation: wave 0.8s ease-in-out infinite .2s;
+      height: 8px;
+    }
+
+    .wave-bar:nth-child(4) {
+      animation: wave 0.8s ease-in-out infinite .3s;
+      height: 14px;
+    }
+
+    .wave-bar:nth-child(5) {
+      animation: wave 0.8s ease-in-out infinite .1s;
+      height: 8px;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useRef, useCallback } = React;
+
+    /* ─── Sentiment Badge ─── */
+    const Sentiment = ({ s, score }) => {
+      const cls = s === 'Positive' ? 'badge-pos' : s === 'Negative' ? 'badge-neg' : 'badge-neu';
+      const dot = s === 'Positive' ? '▲' : s === 'Negative' ? '▼' : '●';
+      return <span className={`badge ${cls}`}>{dot} {s} {score}%</span>;
+    };
+
+    /* ─── Donut Chart ─── */
+    const DonutChart = ({ data, label }) => {
+      const canvasRef = useRef(null);
+      const chartRef = useRef(null);
+      useEffect(() => {
+        if (!canvasRef.current) return;
+        if (chartRef.current) chartRef.current.destroy();
+        chartRef.current = new Chart(canvasRef.current, {
+          type: 'doughnut',
+          data: {
+            labels: ['Positive', 'Negative', 'Neutral'],
+            datasets: [{ data: [data.Positive || 0, data.Negative || 0, data.Neutral || 0], backgroundColor: ['#3ecf8e', '#f56565', '#2e3450'], borderWidth: 0, hoverOffset: 4 }],
+          },
+          options: { cutout: '72%', plugins: { legend: { display: false } }, animation: { duration: 600 } },
+        });
+        return () => chartRef.current?.destroy();
+      }, [data]);
+      const total = (data.Positive || 0) + (data.Negative || 0) + (data.Neutral || 0);
+      return (
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+          <div className="donut-wrap" style={{ width: 72, height: 72 }}>
+            <canvas ref={canvasRef} width="72" height="72" />
+            <div className="donut-center">{total}</div>
+          </div>
+          <span style={{ fontSize: 10, color: 'var(--muted)', textAlign: 'center', maxWidth: 72, lineHeight: 1.3, fontFamily: 'Syne,sans-serif', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.04em' }}>{label}</span>
+        </div>
+      );
+    };
+
+    /* ─── Detail Modal ─── */
+    const DetailModal = ({ article, onClose, bookmarks, toggleBookmark }) => {
+      const [detail, setDetail] = useState('');
+      const [loading, setLoading] = useState(true);
+      const [speaking, setSpeaking] = useState(false);
+      const synthRef = useRef(null);
+      const saved = bookmarks.some(b => b.url === article.url);
+
+      useEffect(() => {
+        const fetchDetail = async () => {
+          try {
+            const p = new URLSearchParams({ title: article.title, desc: article.description, url: article.url || '' });
+            const r = await fetch(`/api/detail?${p}`);
+            const d = await r.json();
+            setDetail(d.detailed || article.description);
+          } catch { setDetail(article.description); }
+          finally { setLoading(false); }
+        };
+        fetchDetail();
+        return () => { if (window.speechSynthesis) window.speechSynthesis.cancel(); };
+      }, []);
+
+      const handleSpeak = () => {
+        if (!window.speechSynthesis) return;
+        if (speaking) { window.speechSynthesis.cancel(); setSpeaking(false); return; }
+        const text = `${article.title}. ${detail || article.summary}`;
+        const utt = new SpeechSynthesisUtterance(text);
+        utt.rate = 0.95; utt.pitch = 1;
+        utt.onend = () => setSpeaking(false);
+        utt.onerror = () => setSpeaking(false);
+        window.speechSynthesis.speak(utt);
+        setSpeaking(true);
+      };
+
+      return (
+        <div className="modal-overlay" onClick={e => { if (e.target === e.currentTarget) { window.speechSynthesis?.cancel(); onClose(); } }}>
+          <div className="modal-box">
+
+            {/* ── Scrollable content ── */}
+            <div className="modal-scroll">
+              {article.image && (
+                <div style={{ height: 220, overflow: 'hidden', borderRadius: '20px 20px 0 0', position: 'relative', flexShrink: 0 }}>
+                  <img src={article.image} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={e => e.target.parentElement.style.display = 'none'} />
+                  <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, transparent 40%, var(--surface))' }} />
+                </div>
+              )}
+              <div style={{ padding: '24px 28px 16px' }}>
+                {/* Header */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, marginBottom: 12 }}>
+                  <h2 style={{ fontFamily: 'Syne,sans-serif', fontWeight: 800, fontSize: 18, lineHeight: 1.35, color: 'var(--text)', flex: 1 }}>{article.title}</h2>
+                  <button onClick={onClose} style={{ background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: 8, color: 'var(--muted)', cursor: 'pointer', padding: '6px 10px', fontSize: 16, flexShrink: 0, lineHeight: 1 }}>✕</button>
+                </div>
+
+                {/* Meta row */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20, flexWrap: 'wrap' }}>
+                  <Sentiment s={article.sentiment} score={article.score} />
+                  {article.source && <span style={{ fontSize: 12, color: 'var(--muted)', fontWeight: 500 }}>{article.source}</span>}
+                  {article.pubDate && <span style={{ fontSize: 12, color: 'var(--muted)' }}>{article.pubDate}</span>}
+                  {article.subtopic && article.subtopic !== 'General' && (
+                    <span style={{ fontSize: 10, fontWeight: 700, fontFamily: 'Syne,sans-serif', color: 'var(--accent2)', background: 'rgba(62,207,142,.1)', border: '1px solid rgba(62,207,142,.2)', padding: '2px 8px', borderRadius: 6, textTransform: 'uppercase', letterSpacing: '.05em' }}>{article.subtopic}</span>
+                  )}
+                </div>
+
+                {/* Deep analysis */}
+                <div style={{ marginBottom: 16 }}>
+                  <p style={{ fontSize: 11, fontWeight: 700, fontFamily: 'Syne,sans-serif', textTransform: 'uppercase', letterSpacing: '.08em', color: 'var(--muted)', marginBottom: 14 }}>AI Deep Analysis</p>
+                  {loading ? (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, color: 'var(--muted)', fontSize: 13, padding: '32px 0' }}>
+                      <svg className="spin" width="16" height="16" viewBox="0 0 24 24" fill="none">
+                        <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" opacity=".25" />
+                        <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+                      </svg>
+                      Generating deep analysis with Claude Sonnet…
+                    </div>
+                  ) : (
+                    <div style={{ fontSize: 14, lineHeight: 1.85, color: '#c8ccdf' }}>
+                      {detail.split('\n').map((line, i) => {
+                        if (line.startsWith('**') && line.endsWith('**')) {
+                          return <p key={i} style={{ fontFamily: 'Syne,sans-serif', fontWeight: 700, fontSize: 11, textTransform: 'uppercase', letterSpacing: '.08em', color: 'var(--accent2)', marginTop: i === 0 ? 0 : 24, marginBottom: 8, borderBottom: '1px solid rgba(62,207,142,.12)', paddingBottom: 6 }}>{line.replace(/\*\*/g, '')}</p>;
+                        }
+                        if (line.trim() === '') return null;
+                        return <p key={i} style={{ marginBottom: 10 }}>{line}</p>;
+                      })}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* ── Pinned action bar ── */}
+            <div style={{
+              padding: '14px 24px', borderTop: '1px solid var(--border)',
+              background: 'var(--surface)', borderRadius: '0 0 20px 20px',
+              display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', flexShrink: 0
+            }}>
+              {/* TTS */}
+              <button onClick={handleSpeak} style={{
+                display: 'flex', alignItems: 'center', gap: 8, padding: '9px 16px', borderRadius: 10, cursor: 'pointer',
+                background: speaking ? 'rgba(62,207,142,.12)' : 'var(--surface2)',
+                border: speaking ? '1px solid rgba(62,207,142,.3)' : '1px solid var(--border)',
+                color: speaking ? 'var(--accent2)' : 'var(--muted)',
+                fontSize: 13, fontWeight: 600, fontFamily: 'Syne,sans-serif', transition: 'all .15s'
+              }}>
+                {speaking ? (
+                  <><div style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                    <span className="wave-bar" /><span className="wave-bar" /><span className="wave-bar" /><span className="wave-bar" /><span className="wave-bar" />
+                  </div> Stop Reading</>
+                ) : (
+                  <><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" /><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07" /></svg> Read Aloud</>
+                )}
+              </button>
+
+              {/* Bookmark */}
+              <button onClick={() => toggleBookmark(article)} style={{
+                display: 'flex', alignItems: 'center', gap: 6, padding: '9px 16px', borderRadius: 10, cursor: 'pointer',
+                background: saved ? 'rgba(62,207,142,.1)' : 'var(--surface2)',
+                border: saved ? '1px solid rgba(62,207,142,.3)' : '1px solid var(--border)',
+                color: saved ? 'var(--accent2)' : 'var(--muted)',
+                fontSize: 13, fontWeight: 600, fontFamily: 'Syne,sans-serif', transition: 'all .15s'
+              }}>
+                {saved ? '★ Saved' : '☆ Save'}
+              </button>
+
+              {/* Original link */}
+              <a href={article.url} target="_blank" rel="noopener" style={{
+                display: 'flex', alignItems: 'center', gap: 6, padding: '9px 16px', borderRadius: 10,
+                background: 'var(--accent)', color: '#fff', textDecoration: 'none',
+                fontSize: 13, fontWeight: 600, fontFamily: 'Syne,sans-serif',
+                boxShadow: '0 0 16px rgba(91,106,240,.3)', transition: 'all .15s', marginLeft: 'auto'
+              }}>
+                Read Original ↗
+              </a>
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    /* ─── Reading List Panel ─── */
+    const ReadingPanel = ({ open, onClose, bookmarks, removeBookmark, onCardClick }) => (
+      <div className={`reading-panel ${open ? 'open' : ''}`}>
+        <div style={{ padding: '20px 20px 16px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div>
+            <h2 style={{ fontFamily: 'Syne,sans-serif', fontWeight: 800, fontSize: 15, color: 'var(--text)' }}>Reading List</h2>
+            <p style={{ fontSize: 11, color: 'var(--muted)', marginTop: 2 }}>{bookmarks.length} saved article{bookmarks.length !== 1 ? 's' : ''}</p>
+          </div>
+          <button onClick={onClose} style={{ background: 'transparent', border: '1px solid var(--border)', borderRadius: 8, color: 'var(--muted)', cursor: 'pointer', padding: '5px 9px', fontSize: 14 }}>✕</button>
+        </div>
+        <div style={{ flex: 1, overflowY: 'auto', padding: '12px' }}>
+          {bookmarks.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '48px 16px', color: 'var(--muted)' }}>
+              <div style={{ fontSize: 32, marginBottom: 8 }}>☆</div>
+              <p style={{ fontFamily: 'Syne,sans-serif', fontWeight: 600, fontSize: 13 }}>No saved articles yet</p>
+              <p style={{ fontSize: 12, marginTop: 4 }}>Click the star on any article to save it here.</p>
+            </div>
+          ) : bookmarks.map((a, i) => (
+            <div key={i} style={{ background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: 12, padding: '12px', marginBottom: 8, cursor: 'pointer' }} onClick={() => onCardClick(a)}>
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
+                <div style={{ flex: 1 }}>
+                  <p style={{ fontSize: 12, fontWeight: 700, fontFamily: 'Syne,sans-serif', lineHeight: 1.4, color: 'var(--text)', marginBottom: 4 }}>{a.title}</p>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <span style={{ fontSize: 10, color: 'var(--muted)' }}>{a.source}</span>
+                    {a.pubDate && <span style={{ fontSize: 10, color: 'var(--muted)' }}>{a.pubDate}</span>}
+                  </div>
+                </div>
+                <button onClick={e => { e.stopPropagation(); removeBookmark(a.url); }} style={{ background: 'transparent', border: 'none', color: 'var(--accent2)', cursor: 'pointer', fontSize: 16, lineHeight: 1, flexShrink: 0 }}>★</button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+
+    /* ─── Article Card ─── */
+    const ArticleCard = ({ a, idx, onClick, bookmarks, toggleBookmark }) => {
+      const saved = bookmarks.some(b => b.url === a.url);
+      return (
+        <div className="card fade-up" style={{ animationDelay: `${idx * 40}ms` }} onClick={() => onClick(a)}>
+          {a.image && (
+            <div style={{ height: 160, overflow: 'hidden', position: 'relative' }}>
+              <img src={a.image} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={e => { e.target.parentElement.style.display = 'none'; }} />
+              <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, transparent 50%, var(--surface))' }} />
+            </div>
+          )}
+          <button className={`bookmark-btn ${saved ? 'saved' : ''}`}
+            onClick={e => { e.stopPropagation(); toggleBookmark(a); }}
+            title={saved ? 'Remove bookmark' : 'Save to reading list'}>
+            {saved ? '★' : '☆'}
+          </button>
+          <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: 10, flex: 1 }}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8 }}>
+              <h3 style={{ fontSize: 13, fontWeight: 700, lineHeight: 1.45, color: 'var(--text)', flex: 1, fontFamily: 'Syne,sans-serif' }}>{a.title}</h3>
+              <Sentiment s={a.sentiment} score={a.score} />
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+              <span style={{ fontSize: 11, color: 'var(--muted)', fontWeight: 500 }}>{a.source}</span>
+              {a.pubDate && <><span style={{ color: 'var(--border)', fontSize: 11 }}>·</span><span style={{ fontSize: 11, color: 'var(--muted)' }}>{a.pubDate}</span></>}
+              {a.subtopic && a.subtopic !== 'General' && (
+                <span style={{ fontSize: 9, fontWeight: 700, fontFamily: 'Syne,sans-serif', color: 'var(--accent2)', background: 'rgba(62,207,142,.08)', border: '1px solid rgba(62,207,142,.15)', padding: '1px 6px', borderRadius: 4, textTransform: 'uppercase', letterSpacing: '.05em', marginLeft: 'auto' }}>{a.subtopic}</span>
+              )}
+            </div>
+            <p style={{ fontSize: 13, lineHeight: 1.65, color: '#b0b5cc', flex: 1 }}>{a.summary}</p>
+            <p style={{ fontSize: 11, color: 'var(--accent)', opacity: .7, marginTop: 4, fontFamily: 'Syne,sans-serif', fontWeight: 600 }}>Click for deep analysis →</p>
+          </div>
+        </div>
+      );
+    };
+
+    /* ─── Quick topic chips ─── */
+    const QUICK_TOPICS = ['AI', 'Technology', 'Business', 'Science', 'Health', 'Sports', 'Climate', 'Politics', 'Entertainment'];
+
+    /* ─── Main App ─── */
+    function App() {
+      const [topic, setTopic] = useState('');
+      const [search, setSearch] = useState('');
+      const [groups, setGroups] = useState({});
+      const [chartData, setChartData] = useState({});
+      const [meta, setMeta] = useState(null);
+      const [loading, setLoading] = useState(false);
+      const [error, setError] = useState('');
+      const [started, setStarted] = useState(false);
+      const [selectedArticle, setSelectedArticle] = useState(null);
+      const [bookmarks, setBookmarks] = useState(() => {
+        try { return JSON.parse(localStorage.getItem('news_bookmarks') || '[]'); } catch { return []; }
+      });
+      const [showReading, setShowReading] = useState(false);
+      const [recording, setRecording] = useState(false);
+
+      const debounceRef = useRef(null);
+      const recognitionRef = useRef(null);
+
+      // Persist bookmarks
+      useEffect(() => {
+        try { localStorage.setItem('news_bookmarks', JSON.stringify(bookmarks)); } catch { }
+      }, [bookmarks]);
+
+      const toggleBookmark = useCallback((article) => {
+        setBookmarks(prev => {
+          const exists = prev.some(b => b.url === article.url);
+          return exists ? prev.filter(b => b.url !== article.url) : [...prev, article];
+        });
+      }, []);
+
+      const removeBookmark = useCallback((url) => {
+        setBookmarks(prev => prev.filter(b => b.url !== url));
+      }, []);
+
+      const fetchNews = useCallback(async (overrideTopic, overrideSearch) => {
+        const t = overrideTopic !== undefined ? overrideTopic : topic;
+        const s = overrideSearch !== undefined ? overrideSearch : search;
+        setLoading(true); setError(''); setStarted(true);
+        try {
+          const p = new URLSearchParams({ topic: t, search: s });
+          const res = await fetch(`/api/news?${p}`);
+          if (!res.ok) throw new Error(`Server error ${res.status}`);
+          const d = await res.json();
+          setGroups(d.groups || {});
+          setChartData(d.chart_data || {});
+          setMeta(d.meta || null);
+        } catch (e) { setError(e.message); }
+        finally { setLoading(false); }
+      }, [topic, search]);
+
+      const onSearchChange = val => {
+        setSearch(val);
+        if (!started) return;
+        clearTimeout(debounceRef.current);
+        debounceRef.current = setTimeout(() => fetchNews(undefined, val), 420);
+      };
+
+      const onTopicChip = t => { setTopic(t); fetchNews(t, search); };
+
+      const startVoice = () => {
+        const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SR) { alert('Voice recognition is not supported in this browser. Try Chrome.'); return; }
+        if (recording) { recognitionRef.current?.stop(); setRecording(false); return; }
+        const rec = new SR();
+        rec.lang = 'en-US'; rec.interimResults = false; rec.maxAlternatives = 1;
+        rec.onresult = e => {
+          const text = e.results[0][0].transcript;
+          setTopic(text);
+          setRecording(false);
+          fetchNews(text, search);
+        };
+        rec.onerror = () => setRecording(false);
+        rec.onend = () => setRecording(false);
+        rec.start();
+        recognitionRef.current = rec;
+        setRecording(true);
+      };
+
+      const total = Object.values(groups).reduce((s, g) => s + g.length, 0);
+
+      // Group articles by subtopic, capped at 6 per subtopic
+      const groupBySubtopic = (articles) => {
+        const map = {};
+        articles.forEach(a => {
+          const sub = a.subtopic || 'General';
+          if (!map[sub]) map[sub] = [];
+          if (map[sub].length < 6) map[sub].push(a);
+        });
+        return map;
+      };
+
+      return (
+        <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', position: 'relative', zIndex: 1 }}>
+
+          {/* ── Nav ── */}
+          <nav style={{ position: 'sticky', top: 0, zIndex: 40, borderBottom: '1px solid var(--border)', background: 'rgba(8,9,12,.85)', backdropFilter: 'blur(16px)', padding: '0 24px', height: 56, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <div style={{ width: 30, height: 30, borderRadius: 8, background: 'linear-gradient(135deg,var(--accent),#8b5cf6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Syne,sans-serif', fontWeight: 800, fontSize: 14, color: '#fff' }}>N</div>
+              <span style={{ fontFamily: 'Syne,sans-serif', fontWeight: 700, fontSize: 15, color: 'var(--text)' }}>Smart News</span>
+            </div>
+            <input value={search} onChange={e => onSearchChange(e.target.value)}
+              placeholder="Filter articles…"
+              className="inp" style={{ flex: 1, maxWidth: 320, height: 34, padding: '0 14px', fontSize: 13 }} />
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              {meta && <span style={{ fontSize: 11, color: 'var(--muted)', fontFamily: 'Syne,sans-serif', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.05em', whiteSpace: 'nowrap' }}>{meta.topic}</span>}
+              {/* Reading list button */}
+              <button className={`btn-icon ${showReading ? 'active' : ''}`} onClick={() => setShowReading(v => !v)} title="Reading list" style={{ position: 'relative' }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" /></svg>
+                {bookmarks.length > 0 && <span style={{ position: 'absolute', top: -4, right: -4, background: 'var(--accent2)', color: '#000', borderRadius: 99, fontSize: 9, fontWeight: 800, padding: '1px 5px', fontFamily: 'Syne,sans-serif' }}>{bookmarks.length}</span>}
+              </button>
+            </div>
+          </nav>
+
+          {/* ── Hero ── */}
+          <div style={{ maxWidth: 1200, margin: '0 auto', width: '100%', padding: '48px 24px 32px' }}>
+            <p style={{ fontSize: 11, color: 'var(--accent)', fontFamily: 'Syne,sans-serif', fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', marginBottom: 10 }}>
+              AI-Powered News Intelligence
+            </p>
+            <h1 style={{ fontSize: 'clamp(28px,5vw,48px)', fontWeight: 800, lineHeight: 1.1, marginBottom: 8 }}>
+              Today's World,{' '}
+              <span style={{ background: 'linear-gradient(90deg,var(--accent),var(--accent2))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                Explained Your Way
+              </span>
+            </h1>
+            <p style={{ fontSize: 14, color: 'var(--muted)', marginBottom: 28, maxWidth: 520, lineHeight: 1.65 }}>
+              Fetch any topic and get AI-summarised articles grouped by theme, with subtopic filtering, sentiment analysis, voice search, and read-aloud.
+            </p>
+
+            {/* Controls row */}
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'flex-end', marginBottom: 20 }}>
+              <div style={{ flex: 1, minWidth: 200 }}>
+                <label style={{ fontSize: 11, color: 'var(--muted)', fontFamily: 'Syne,sans-serif', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.06em', display: 'block', marginBottom: 6 }}>Topic</label>
+                <input value={topic} onChange={e => setTopic(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && fetchNews()}
+                  placeholder="e.g. AI, climate, bitcoin…"
+                  className="inp" style={{ width: '100%' }} />
+              </div>
+              {/* Mic button */}
+              <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
+                <label style={{ fontSize: 11, color: 'var(--muted)', fontFamily: 'Syne,sans-serif', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.06em', display: 'block', marginBottom: 6, opacity: 0 }}>_</label>
+                <button className={`btn-icon ${recording ? 'recording' : ''}`} onClick={startVoice} title={recording ? 'Stop recording' : 'Voice search'} style={{ width: 42, height: 42 }}>
+                  {recording ? (
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="#f56565"><rect x="6" y="6" width="12" height="12" rx="2" /></svg>
+                  ) : (
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" /><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8" /></svg>
+                  )}
+                </button>
+              </div>
+              <button onClick={() => fetchNews()} disabled={loading} className="btn-primary" style={{ height: 42, alignSelf: 'flex-end' }}>
+                {loading
+                  ? <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}><svg className="spin" width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" opacity=".25" /><path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" strokeWidth="3" strokeLinecap="round" /></svg>Fetching…</span>
+                  : 'Get News'}
+              </button>
+            </div>
+
+            {/* Recording hint */}
+            {recording && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12, fontSize: 13, color: '#f56565', fontFamily: 'Syne,sans-serif', fontWeight: 600 }}>
+                <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#f56565', display: 'inline-block', animation: 'pulse 1s infinite' }} />
+                Listening… speak your topic now
+              </div>
+            )}
+
+            {/* Quick topic chips */}
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+              <span style={{ fontSize: 11, color: 'var(--muted)', alignSelf: 'center', fontFamily: 'Syne,sans-serif', fontWeight: 600, marginRight: 4 }}>Quick:</span>
+              {QUICK_TOPICS.map(t => (
+                <button key={t} className="topic-chip" onClick={() => onTopicChip(t)}>{t}</button>
+              ))}
+            </div>
+          </div>
+
+          {/* ── Error ── */}
+          {error && (
+            <div style={{ maxWidth: 1200, margin: '0 auto 16px', width: '100%', padding: '0 24px' }}>
+              <div style={{ background: 'rgba(245,101,101,.1)', border: '1px solid rgba(245,101,101,.25)', color: '#f56565', borderRadius: 12, padding: '12px 16px', fontSize: 13 }}>⚠ {error}</div>
+            </div>
+          )}
+
+          {/* ── Sentiment Strip ── */}
+          {!loading && Object.keys(chartData).length > 0 && (
+            <div style={{ maxWidth: 1200, margin: '0 auto 32px', width: '100%', padding: '0 24px' }}>
+              <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 16, padding: '20px 24px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+                  <h2 style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)', fontFamily: 'Syne,sans-serif' }}>Sentiment by Topic</h2>
+                  <span style={{ fontSize: 12, color: 'var(--muted)' }}>{total} articles</span>
+                </div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 20, justifyContent: 'center' }}>
+                  {Object.entries(chartData).map(([g, d]) => <DonutChart key={g} data={d} label={g} />)}
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'center', gap: 20, marginTop: 16 }}>
+                  {[['#3ecf8e', 'Positive'], ['#f56565', 'Negative'], ['#2e3450', 'Neutral']].map(([c, l]) => (
+                    <span key={l} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: 'var(--muted)' }}>
+                      <span style={{ width: 8, height: 8, borderRadius: '50%', background: c, display: 'inline-block' }} />{l}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ── Article Groups ── */}
+          <div style={{ maxWidth: 1200, margin: '0 auto', width: '100%', padding: '0 24px', flex: 1 }}>
+            {!loading && Object.entries(groups).map(([group, articles]) => {
+              const bySubtopic = groupBySubtopic(articles);
+              return (
+                <div key={group} style={{ marginBottom: 56 }}>
+                  {/* ── Group header ── */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 24, borderBottom: '1px solid var(--border)', paddingBottom: 14 }}>
+                    <h2 style={{ fontSize: 17, fontWeight: 800, color: 'var(--text)', fontFamily: 'Syne,sans-serif' }}>{group}</h2>
+                    <span style={{ fontSize: 11, background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--muted)', padding: '2px 9px', borderRadius: 99, fontFamily: 'Syne,sans-serif', fontWeight: 700 }}>{articles.length}</span>
+                  </div>
+                  {/* ── Subtopic rows ── */}
+                  {Object.entries(bySubtopic).map(([sub, arts]) => (
+                    <div key={sub} style={{ marginBottom: 36 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+                        <span style={{ fontSize: 10, fontWeight: 700, fontFamily: 'Syne,sans-serif', textTransform: 'uppercase', letterSpacing: '.09em', color: 'var(--accent2)' }}>{sub}</span>
+                        <div style={{ flex: 1, height: 1, background: 'var(--border)' }} />
+                        <span style={{ fontSize: 10, color: 'var(--muted)', fontFamily: 'Syne,sans-serif', fontWeight: 600 }}>{arts.length} articles</span>
+                      </div>
+                      <div className="subtopic-row">
+                        {arts.map((a, i) => (
+                          <div key={i} style={{ minWidth: 300, maxWidth: 300, flexShrink: 0, scrollSnapAlign: 'start' }}>
+                            <ArticleCard a={a} idx={i} onClick={setSelectedArticle} bookmarks={bookmarks} toggleBookmark={toggleBookmark} />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              );
+            })}
+
+            {!loading && started && total === 0 && !error && (
+              <div style={{ textAlign: 'center', padding: '80px 0', color: 'var(--muted)' }}>
+                <div style={{ fontSize: 48, marginBottom: 12 }}>📭</div>
+                <p style={{ fontFamily: 'Syne,sans-serif', fontWeight: 600 }}>No articles found.</p>
+                <p style={{ fontSize: 13, marginTop: 6 }}>Try a different topic or check your API key.</p>
+              </div>
+            )}
+
+            {!started && (
+              <div style={{ textAlign: 'center', padding: '80px 0' }}>
+                <div style={{ fontSize: 52, marginBottom: 16 }}>🧠</div>
+                <p style={{ fontSize: 15, color: 'var(--muted)', fontFamily: 'Syne,sans-serif', fontWeight: 600 }}>
+                  Pick a topic and hit <span style={{ color: 'var(--text)' }}>Get News</span>
+                </p>
+                <p style={{ fontSize: 13, color: 'var(--muted)', marginTop: 8 }}>
+                  Or try voice search — click the microphone button and speak.
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* ── Footer ── */}
+          <footer style={{ borderTop: '1px solid var(--border)', padding: '20px 24px', textAlign: 'center', fontSize: 11, color: 'var(--muted)', fontFamily: 'Syne,sans-serif', fontWeight: 600, letterSpacing: '.04em', textTransform: 'uppercase', marginTop: 32 }}>
+            Smart News · NewsAPI · Claude AI · Sentiment · NLP Grouping
+          </footer>
+
+          {/* ── Detail Modal ── */}
+          {selectedArticle && (
+            <DetailModal
+              article={selectedArticle}
+              onClose={() => setSelectedArticle(null)}
+              bookmarks={bookmarks}
+              toggleBookmark={toggleBookmark}
+            />
+          )}
+
+          {/* ── Reading List Panel ── */}
+          <ReadingPanel
+            open={showReading}
+            onClose={() => setShowReading(false)}
+            bookmarks={bookmarks}
+            removeBookmark={removeBookmark}
+            onCardClick={a => { setSelectedArticle(a); }}
+          />
+
+          {/* Overlay when reading panel open */}
+          {showReading && <div onClick={() => setShowReading(false)} style={{ position: 'fixed', inset: 0, zIndex: 80, background: 'rgba(0,0,0,.3)', backdropFilter: 'blur(2px)' }} />}
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+
+</html>
